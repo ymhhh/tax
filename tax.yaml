@@ -1,0 +1,42 @@
+global:
+  for: true
+  accumulation_fund_base: 27786.00
+  accumulation_fund_rate: 12
+
+salaries:
+  - threshold: 5000
+    salary: 10000
+    subsidy_amount: 100
+    insurance: 1000
+    accumulation_fund: 1000
+    deductible_amount: 1000
+
+year_tax_rates:
+  - salary_min: 0
+    salary_max: 36000
+    rate: 3
+    deducted_amount: 0
+  - salary_min: 36000
+    salary_max: 144000
+    rate: 10
+    deducted_amount: 2520
+  - salary_min: 144000
+    salary_max: 300000
+    rate: 20
+    deducted_amount: 16920
+  - salary_min: 300000
+    salary_max: 420000
+    rate: 25
+    deducted_amount: 31920
+  - salary_min: 420000
+    salary_max: 660000
+    rate: 30
+    deducted_amount: 52920
+  - salary_min: 660000
+    salary_max: 960000
+    rate: 35
+    deducted_amount: 85920
+  - salary_min: 960000
+    salary_max: 0
+    rate: 45
+    deducted_amount: 181920
