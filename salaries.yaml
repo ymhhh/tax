@@ -1,0 +1,16 @@
+for: true
+
+residence: 0
+endowment: 0
+
+monthly_salaries:
+  - threshold: 5000
+    salary: 10000
+    subsidy_amount: 100
+    accumulation_fund_rate: 12
+    endowment_base: 1000
+    medical_base: 1000
+    unemployment_base: 1000
+    employment_injury_base: 1000
+    birth_base: 1000
+    serious_medical_base: 0

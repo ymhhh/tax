@@ -1,4 +1,4 @@
-# github.com/go-trellis/common v1.6.1
+# github.com/go-trellis/common v1.7.0
 github.com/go-trellis/common/formats
 # github.com/go-trellis/config v1.4.1
 github.com/go-trellis/config

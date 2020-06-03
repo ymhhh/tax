@@ -1,0 +1,12 @@
+residence: 0 # 户口类型, 0 非农（默认）；1 农业
+endowment: 0 # 养老类型, 0 职员； 1 机关
+salary: 30000
+
+accumulation_fund_rate: 12
+
+endowment_base: 23565
+medical_base: 27786
+unemployment_base: 23565
+employment_injury_base: 23118
+birth_base: 27786
+serious_medical_base: 0

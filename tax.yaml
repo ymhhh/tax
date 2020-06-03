@@ -1,15 +1,59 @@
-global:
-  for: true
-  accumulation_fund_base: 27786.00
-  accumulation_fund_rate: 12
 
-salaries:
-  - threshold: 5000
-    salary: 10000
-    subsidy_amount: 100
-    insurance: 1000
-    accumulation_fund: 1000
-    deductible_amount: 1000
+insurances:
+  workers_endowment:
+    min_base: 3613
+    max_base: 23565
+    company_rate: 16
+    private_rate: 8
+    extra_payment: 0
+  office_endowment:
+    min_base: 4713
+    max_base: 23565
+    company_rate: 16
+    private_rate: 8
+    extra_payment: 0
+  medical:
+    min_base: 5557
+    max_base: 27786
+    company_rate: 10
+    private_rate: 2
+    extra_payment: 0
+  non_agricultural_unemployment:
+    min_base: 3613
+    max_base: 23565
+    company_rate: 0.8
+    private_rate: 0.2
+    extra_payment: 0
+  agricultural_unemployment:
+    min_base: 3613
+    max_base: 23565
+    company_rate: 0.8
+    private_rate: 0
+    extra_payment: 0
+  employment_injury:
+    min_base: 4624
+    max_base: 23118
+    company_rate: 0.2
+    private_rate: 0
+    extra_payment: 0
+  birth:
+    min_base: 5557
+    max_base: 27786
+    company_rate: 0.8
+    private_rate: 0
+    extra_payment: 0
+  serious_medical:
+    min_base: 0
+    max_base: 0
+    company_rate: 0
+    private_rate: 0
+    extra_payment: 3
+
+accumulation_fund:
+  min_base: 2200
+  max_base: 27786
+  min_rate: 5
+  max_rate: 12
 
 year_tax_rates:
   - salary_min: 0
