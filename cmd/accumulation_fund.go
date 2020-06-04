@@ -19,7 +19,9 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/go-trellis/config"
 	"github.com/ymhhh/tax/handlers"
 
 	"github.com/spf13/cobra"
@@ -32,20 +34,27 @@ var accumulationFundCmd = &cobra.Command{
 	Short:   "计算公积金",
 	Long: `
 通过公积金基数和比例计算公积金
+./tax f
 
 	样例:
-	./tax --config="tax.yaml" f -s 1000 -r 12
+	./tax --config="tax.yaml" f -c="personal.yaml"
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("开始计算公积金")
 
-		i, err := handlers.NewAccumulationFund(cfgFile)
+		i, err := handlers.NewAccumulationFundHandler(cfgFile)
 		if err != nil {
 			fmt.Println("读取配置出错")
 			return
 		}
+		var afPersonalInfo handlers.PersonalInfo
 
-		result, err := i.Calc(afPersonalInfo)
+		if err := config.NewSuffixReader().Read(accumulationFundConfig, &afPersonalInfo); err != nil {
+			log.Fatalln("读取配置失败", err)
+			return
+		}
+
+		result, err := i.Calc(&afPersonalInfo)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -55,13 +64,10 @@ var accumulationFundCmd = &cobra.Command{
 	},
 }
 
-var afPersonalInfo *handlers.PersonalInfo
+var accumulationFundConfig string
 
 func init() {
 	rootCmd.AddCommand(accumulationFundCmd)
 
-	afPersonalInfo = &handlers.PersonalInfo{}
-
-	accumulationFundCmd.Flags().Float64VarP(&afPersonalInfo.Salary, "salary", "s", 0, "月薪水，默认为0")
-	accumulationFundCmd.Flags().Float64VarP(&afPersonalInfo.AccumulationFundRate, "rate", "r", 12, "缴纳比例")
+	accumulationFundCmd.Flags().StringVarP(&accumulationFundConfig, "subc", "c", "personal.yaml", "个人信息配置文件路径")
 }

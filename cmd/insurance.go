@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/go-trellis/config"
 	"github.com/ymhhh/tax/handlers"
@@ -33,29 +34,27 @@ var insuranceCmd = &cobra.Command{
 	Short:   "计算社会保险",
 	Long: `
 	通过社会保险基数计算个人的社保缴纳金额
+	./tax i
 
 	样例:
-	./tax --config="tax.yaml" i -p="personal.yaml"
+	./tax --config="tax.yaml" i -c="personal.yaml"
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("开始计算社会保险")
-		i, err := handlers.NewInsurances(cfgFile)
+		i, err := handlers.NewInsurancesHandler(cfgFile)
 		if err != nil {
-			fmt.Println("读取配置文件失败")
-			return
+			log.Fatalln("读取配置文件失败", err)
 		}
 
 		var insuranceInfo handlers.PersonalInfo
-
 		if err := config.NewSuffixReader().Read(insuranceConfig, &insuranceInfo); err != nil {
-			fmt.Println("读取配置文件失败")
+			log.Fatalln("读取配置失败", err)
 			return
 		}
 
 		result, err := i.Calc(&insuranceInfo)
 		if err != nil {
-			fmt.Println("计算数据失败")
-			return
+			log.Fatalln("计算出错", err)
 		}
 
 		result.Print()
@@ -67,5 +66,5 @@ var insuranceConfig string
 func init() {
 	rootCmd.AddCommand(insuranceCmd)
 
-	insuranceCmd.Flags().StringVarP(&insuranceConfig, "pconf", "p", "personal.yaml", "个人信息配置文件")
+	insuranceCmd.Flags().StringVarP(&insuranceConfig, "subc", "c", "personal.yaml", "个人信息配置文件")
 }

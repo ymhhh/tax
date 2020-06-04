@@ -23,8 +23,8 @@ import (
 	"github.com/go-trellis/config"
 )
 
-// AccumulationFund 公积金对象
-type AccumulationFund struct {
+// AccumulationFundHandler 公积金对象
+type AccumulationFundHandler struct {
 	AccumulationFundBase `yaml:"accumulation_fund" json:"accumulation_fund"`
 }
 
@@ -44,9 +44,9 @@ type CalcAccumulationFund struct {
 	MaxPrivateFund float64 `yaml:"max_private_fund" json:"max_private_fund"`
 }
 
-// NewAccumulationFund 生成公积金对象
-func NewAccumulationFund(file string) (*AccumulationFund, error) {
-	a := &AccumulationFund{}
+// NewAccumulationFundHandler 生成公积金对象
+func NewAccumulationFundHandler(file string) (*AccumulationFundHandler, error) {
+	a := &AccumulationFundHandler{}
 	err := config.NewSuffixReader().Read(file, a)
 	if err != nil {
 		return nil, err
@@ -55,12 +55,13 @@ func NewAccumulationFund(file string) (*AccumulationFund, error) {
 }
 
 const (
-	printFundInfor = "%s, 最低基数: %0.f, 最高基数: %0.f, 最低比例: %0.2f%%, 最高比例: %0.2f%%, 单位最低金额: %0.f, 单位最高金额: %0.f, 个人最低金额: %0.f, 个人最高金额: %0.f. \n\t  实际基数: %0.f, 缴纳比例: %0.2f%%, 单位缴纳: %0.f, 个人缴纳: %0.f"
+	printFundInfor = "%s, 月收入: %.2f, 最低基数: %0.f, 最高基数: %0.f, 最低比例: %0.2f%%, 最高比例: %0.2f%%, 单位最低金额: %0.f, 单位最高金额: %0.f, 个人最低金额: %0.f, 个人最高金额: %0.f. \n\t  实际基数: %0.f, 缴纳比例: %0.2f%%, 单位缴纳: %0.f, 个人缴纳: %0.f"
 )
 
 // Print 打印信息
 func (p *CalcAccumulationFund) Print() {
 	fmt.Println(fmt.Sprintf(printFundInfor, "公积金",
+		p.Salary,
 		p.AccumulationFundBase.MinBase, p.AccumulationFundBase.MaxBase,
 		p.AccumulationFundBase.MinRate, p.AccumulationFundBase.MaxRate,
 		p.MinCompanyFund, p.MaxCompanyFund,
@@ -70,7 +71,7 @@ func (p *CalcAccumulationFund) Print() {
 }
 
 // Calc 计算
-func (p *AccumulationFund) Calc(info *PersonalInfo) (*CalcAccumulationFund, error) {
+func (p *AccumulationFundHandler) Calc(info *PersonalInfo) (*CalcAccumulationFund, error) {
 	result := &CalcAccumulationFund{
 		AccumulationFundBase: p.AccumulationFundBase,
 

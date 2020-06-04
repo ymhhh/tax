@@ -1,16 +1,29 @@
-for: true
+# false 只计算列入 monthly_salaries 的数据，true会计算当年的全部情况（可能属于模拟）
 
-residence: 0
-endowment: 0
+for: true 
+
+residence: 0 # 户口类型, 0 非农（默认）；1 农业
+endowment: 0 # 养老类型, 0 职员； 1 机关
 
 monthly_salaries:
-  - threshold: 5000
-    salary: 10000
-    subsidy_amount: 100
+  # 按月轮训的，起始是1月，如果有多月，请从1月到n月
+  - # 起征线
+    threshold: 5000
+    # 当前月薪
+    salary: 30000
+    # 补助总计
+    subsidy_amount: 330
+    # 公积金比例
     accumulation_fund_rate: 12
-    endowment_base: 1000
-    medical_base: 1000
-    unemployment_base: 1000
-    employment_injury_base: 1000
-    birth_base: 1000
+    # 养老基数
+    endowment_base: 23565
+    # 医疗基数
+    medical_base: 27786
+    # 失业基数
+    unemployment_base: 23565
+    # 工伤基数
+    employment_injury_base: 23118
+    # 生育基数
+    birth_base: 27786
+    # 大病基数
     serious_medical_base: 0

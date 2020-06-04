@@ -86,7 +86,7 @@ type PersonalInfo struct {
 	Residence ResidenceType `yaml:"residence" json:"residence"`
 	Endowment EndowmentType `yaml:"endowment" json:"endowment"`
 
-	SalaryBase `yaml:"-" json:"-"`
+	SalaryBase `yaml:",inline" json:",inline"`
 }
 
 // SalaryBase 基本薪水信息

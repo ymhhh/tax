@@ -39,6 +39,8 @@ var rootCmd = &cobra.Command{
 	./tax f --help
 	2. 计算社会保险
 	./tax i --help
+	3. 计算个税
+	./tax t --help
 `,
 }
 

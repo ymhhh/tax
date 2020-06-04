@@ -21,55 +21,51 @@ import (
 	"fmt"
 
 	"github.com/go-trellis/config"
-
-	"github.com/ymhhh/tax/handlers"
-
 	"github.com/spf13/cobra"
+	"github.com/ymhhh/tax/handlers"
 )
+
+var salariesConfig string
 
 // taxCmd represents the tax command
 var taxCmd = &cobra.Command{
 	Use:     "tax",
 	Aliases: []string{"t"},
-	Short:   "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short:   "计算月工资情况",
+	Long: `
+计算月工资，并按照五险一金扣除，以及部分可抵扣个税的金额，综合计算按年的月收入情况
+./tax t
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	完整样例
+	./tax --config="tax.yaml" t -c="salaries.yaml"
+`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("tax called")
+		fmt.Println("开始计算个税情况")
 
-		taxes, err := handlers.NewTaxes(cfgFile)
+		taxes, err := handlers.NewTaxesHandler(cfgFile)
 		if err != nil {
 			panic(err)
 		}
 
 		ss := &handlers.Salaries{}
 
-		if err := config.NewSuffixReader().Read(cfgFile, ss); err != nil {
+		if err := config.NewSuffixReader().Read(subCfgFile, ss); err != nil {
 			panic(err)
 		}
 
-		//TODO
-		_, err = taxes.Calc(ss)
+		data, err := taxes.Calc(ss)
 		if err != nil {
 			panic(err)
 		}
+
+		data.Print()
 	},
 }
+
+var subCfgFile string
 
 func init() {
 	rootCmd.AddCommand(taxCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// taxCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// taxCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	taxCmd.Flags().StringVarP(&subCfgFile, "subc", "c", "salaries.yaml", "月工资配置文件")
 }

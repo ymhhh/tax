@@ -23,8 +23,8 @@ import (
 	"github.com/go-trellis/config"
 )
 
-// Insurances 社保对象
-type Insurances struct {
+// InsurancesHandler 社保对象
+type InsurancesHandler struct {
 	InsurancesBase `yaml:"insurances" json:"insurances"`
 }
 
@@ -68,9 +68,9 @@ type CalcInsurancesAmount struct {
 	PrivateTotalAmount float64 `yaml:"private_total_amount" json:"private_total_amount"`
 }
 
-// NewInsurances 生成社保对象
-func NewInsurances(file string) (*Insurances, error) {
-	i := &Insurances{}
+// NewInsurancesHandler 生成社保对象
+func NewInsurancesHandler(file string) (*InsurancesHandler, error) {
+	i := &InsurancesHandler{}
 	err := config.NewSuffixReader().Read(file, i)
 	if err != nil {
 		return nil, err
@@ -157,7 +157,7 @@ func (p *CalcInsurancesAmount) Print() {
 }
 
 // Calc 计算
-func (p *Insurances) Calc(info *PersonalInfo) (*CalcInsurancesAmount, error) {
+func (p *InsurancesHandler) Calc(info *PersonalInfo) (*CalcInsurancesAmount, error) {
 	calc := &CalcInsurancesAmount{
 		InsurancesBase: p.InsurancesBase,
 		PersonalInfo:   *info,
@@ -270,5 +270,7 @@ func (p *Insurances) Calc(info *PersonalInfo) (*CalcInsurancesAmount, error) {
 	calc.CompanyTotalAmount += calc.Company.SeriousMedicalAmount
 	calc.PrivateTotalAmount += calc.Private.SeriousMedicalAmount
 
+	calc.CompanyTotalAmount = Decimal2(calc.CompanyTotalAmount)
+	calc.PrivateTotalAmount = Decimal2(calc.PrivateTotalAmount)
 	return calc, nil
 }

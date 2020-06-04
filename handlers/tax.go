@@ -18,28 +18,33 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package handlers
 
 import (
+	"fmt"
+
 	"github.com/go-trellis/config"
 )
 
-type Taxes struct {
-	AccumulationFund `yaml:",inline" json:",inline"`
-	Insurances       `yaml:",inline" json:",inline"`
+// TaxesHandler handler 对象
+type TaxesHandler struct {
+	AccumulationFundHandler `yaml:",inline" json:",inline"`
+	InsurancesHandler       `yaml:",inline" json:",inline"`
 
 	YearTaxBase `yaml:",inline" json:",inline"`
 
-	totalSalaries    float64 `yaml:"-" json:"-"`
-	totalTaxSalaries float64 `yaml:"-" json:"-"`
-	totalTaxation    float64 `yaml:"-" json:"-"`
+	totalSalaries    float64
+	totalTaxSalaries float64
+	totalTaxation    float64
 }
 
-func NewTaxes(file string) (*Taxes, error) {
-	t := &Taxes{}
+// NewTaxesHandler 生成handler对象
+func NewTaxesHandler(file string) (*TaxesHandler, error) {
+	t := &TaxesHandler{}
 	if err := config.NewSuffixReader().Read(file, t); err != nil {
 		return nil, err
 	}
 	return t, nil
 }
 
+// Salaries 薪资配置参数
 type Salaries struct {
 	For bool `yaml:"for" json:"for"`
 
@@ -48,10 +53,12 @@ type Salaries struct {
 	MonthlySalaries []SalaryBase `yaml:"monthly_salaries" json:"monthly_salaries"`
 }
 
+// MonthlyTaxes 返回的对象
 type MonthlyTaxes struct {
 	Taxes []*MonthlyTax `yaml:"taxes" json:"taxes"`
 }
 
+// MonthlyTax 月薪对象
 type MonthlyTax struct {
 	Month int `yaml:"month" json:"month"`
 
@@ -70,7 +77,7 @@ type MonthlyTax struct {
 }
 
 // Calc 计算月薪剩余以及个税情况
-func (p *Taxes) Calc(salaries *Salaries) (t *MonthlyTaxes, err error) {
+func (p *TaxesHandler) Calc(salaries *Salaries) (t *MonthlyTaxes, err error) {
 	taxes := &MonthlyTaxes{}
 	info := &PersonalInfo{}
 	lastMonth := 0
@@ -83,12 +90,12 @@ func (p *Taxes) Calc(salaries *Salaries) (t *MonthlyTaxes, err error) {
 
 		info.SalaryBase = s
 
-		iMonthTax.AccumulationFundResult, err = p.AccumulationFund.Calc(info)
+		iMonthTax.AccumulationFundResult, err = p.AccumulationFundHandler.Calc(info)
 		if err != nil {
 			return nil, err
 		}
 
-		iMonthTax.InsurancesResult, err = p.Insurances.Calc(info)
+		iMonthTax.InsurancesResult, err = p.InsurancesHandler.Calc(info)
 		if err != nil {
 			return nil, err
 		}
@@ -102,16 +109,18 @@ func (p *Taxes) Calc(salaries *Salaries) (t *MonthlyTaxes, err error) {
 
 		iMonthTax.AccumulationFund = iMonthTax.AccumulationFundResult.PrivateFund
 
+		p.getMonthTax(iMonthTax)
+
 		taxes.Taxes = append(taxes.Taxes, iMonthTax)
 	}
 
 	if salaries.For {
-		for i := lastMonth + 1; i < 13; i++ {
+		for i := lastMonth; i < 13; i++ {
 			monthlyTax := taxes.Taxes[lastMonth-1]
 
 			monthlyTaxNext := *monthlyTax
-			monthlyTaxNext.Month = i
-			p.getMonthTax(i, &monthlyTaxNext)
+			monthlyTaxNext.Month = i + 1
+			p.getMonthTax(&monthlyTaxNext)
 			taxes.Taxes = append(taxes.Taxes, &monthlyTaxNext)
 		}
 	}
@@ -119,10 +128,10 @@ func (p *Taxes) Calc(salaries *Salaries) (t *MonthlyTaxes, err error) {
 	return taxes, nil
 }
 
-func (p *Taxes) getMonthTax(lastMonth int, monthlyTax *MonthlyTax) {
+func (p *TaxesHandler) getMonthTax(monthlyTax *MonthlyTax) {
 
-	monthlyTax.RestSalary = monthlyTax.Salary + monthlyTax.SubsidyAmount -
-		monthlyTax.Insurances - monthlyTax.AccumulationFund
+	monthlyTax.RestSalary = Decimal2(monthlyTax.Salary + monthlyTax.SubsidyAmount -
+		monthlyTax.Insurances - monthlyTax.AccumulationFund)
 	taxSalary := monthlyTax.RestSalary - monthlyTax.Threshold - monthlyTax.DeductibleAmount
 	if taxSalary > 0 {
 		p.totalTaxSalaries += taxSalary
@@ -139,13 +148,25 @@ func (p *Taxes) getMonthTax(lastMonth int, monthlyTax *MonthlyTax) {
 			(p.totalTaxSalaries > taxRate.SalaryMax && taxRate.SalaryMax != 0) {
 			continue
 		}
-		tax := (p.totalTaxSalaries*taxRate.Rate)/100.0 - taxRate.DeductedAmount - p.totalTaxation
+		tax := Decimal2((p.totalTaxSalaries*taxRate.Rate)/100.0 - taxRate.DeductedAmount - p.totalTaxation)
 		p.totalTaxation += tax
 
 		monthlyTax.Taxation = tax
-		monthlyTax.RestSalary = monthlyTax.RestSalary - tax
-		monthlyTax.HistorySalary = p.totalSalaries
-		monthlyTax.HistoryTaxation = p.totalTaxation
+		monthlyTax.RestSalary = Decimal2(monthlyTax.RestSalary - tax)
+		monthlyTax.HistorySalary = Decimal2(p.totalSalaries)
+		monthlyTax.HistoryTaxation = Decimal2(p.totalTaxation)
 		return
+	}
+}
+
+const (
+	printTaxInfor = "%2d月, 收入: %10.2f, 补贴: %10.2f, 社保缴纳: %4.2f, 公积金缴纳: %4.2f, 个税缴纳: %10.2f, 剩余工资: %10.2f"
+)
+
+// Print 打印信息
+func (p *MonthlyTaxes) Print() {
+	for _, t := range p.Taxes {
+		fmt.Println(fmt.Sprintf(printTaxInfor, t.Month, t.Salary, t.SubsidyAmount,
+			t.Insurances, t.AccumulationFund, t.Taxation, t.RestSalary))
 	}
 }
