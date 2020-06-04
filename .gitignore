@@ -15,4 +15,4 @@
 # vendor/
 
 tax
-.tax.yaml
+.*.yaml
