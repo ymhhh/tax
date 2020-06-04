@@ -115,7 +115,7 @@ func (p *TaxesHandler) Calc(salaries *Salaries) (t *MonthlyTaxes, err error) {
 	}
 
 	if salaries.For {
-		for i := lastMonth; i < 13; i++ {
+		for i := lastMonth; i < 12; i++ {
 			monthlyTax := taxes.Taxes[lastMonth-1]
 
 			monthlyTaxNext := *monthlyTax
